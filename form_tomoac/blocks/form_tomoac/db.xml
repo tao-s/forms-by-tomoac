@@ -154,7 +154,7 @@
 		</field>
 		<field name="pno2" type="C" size="8">
 		</field>
-		<field name="postno" type="C" size="8">
+		<field name="post no" type="C" size="8">
 		</field>
 		<field name="h1" type="C" size="16">
 		</field>
@@ -180,6 +180,11 @@
 		</field>
 		<field name="f6" type="C" size="4">
 		</field>
+        <index name="postCodeIndex">
+          <col>pno1</col>
+          <col>pno2</col>
+          <col>postno</col>
+        </index>
 	</table>
 
 	<table name="btPostNoJigyosyo">
@@ -197,7 +202,7 @@
 		</field>
 		<field name="k4" type="C" size="255">
 		</field>
-		<field name="postno" type="C" size="8">
+		<field name="post no" type="C" size="8">
 		</field>
 		<field name="p3" type="C" size="8">
 		</field>
@@ -209,5 +214,9 @@
 		</field>
 		<field name="f3" type="C" size="4">
 		</field>
+        <index name="postCodeIndex">
+          <col>pno1</col>
+          <col>postno</col>
+        </index>
 	</table>
 </schema>

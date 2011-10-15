@@ -150,12 +150,19 @@ $uh = Loader::helper('concrete/urls'); ?>
 			</div>
 			<div class="ccm-spacer"></div>
 		</div>
-		
-		
+				
 		<div class="fieldRow" id="answerOptionsArea2"><!-- ------ 日付(date) ------ -->
 			<div class="fieldLabel"><?php  echo '選択させる年' ?>: </div>
 			<div class="fieldValues">
-				<textarea id="answerOptions2" name="answerOptions2" cols="50" rows="4" style="width:90%"></textarea><br />
+				<textarea id="answerOptions2" name="answerOptions2" cols="50" rows="4" style="width:90%"><?php
+    $y = date("Y",time())-10;
+    $end = date("Y",time())+10;
+    while($y < $end){
+        echo $y."\r\n";
+        $y++;
+    }
+            ?></textarea><br />
+
 				<?php  echo '選択させる年を１項目１行で入力してください' ?>
 				<br />初期日付: <input id="layout" name="layout" type="text" value="0" size="8"/>日後
 				<br />説明: <input id="description1" name="description1" type="text" value="" size="32"/>
@@ -259,6 +266,7 @@ $uh = Loader::helper('concrete/urls'); ?>
 		
 		
 <!-- tomoac@ )) -->
+
 		<div class="fieldRow" id="questionRequired">
 			<div class="fieldLabel">&nbsp;</div>
 			<div class="fieldValues"> 
@@ -439,6 +447,7 @@ $uh = Loader::helper('concrete/urls'); ?>
 		
 		
 <!-- tomoac@ )) -->
+
 		<div class="fieldRow" id="questionRequired">
 			<div class="fieldLabel">&nbsp;</div>
 			<div class="fieldValues"> 

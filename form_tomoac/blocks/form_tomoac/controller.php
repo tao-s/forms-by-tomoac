@@ -36,7 +36,6 @@ class FormTomoacBlockController extends BlockController {
 	
 	public function __construct($b = null){ 
 		parent::__construct($b);
-		//$this->bID = intval($this->_bID);
 		if(is_string($this->thankyouMsg) && !strlen($this->thankyouMsg)){ 
 			$this->thankyouMsg = $this->getDefaultThankYouMsg();
 		}
@@ -45,6 +44,7 @@ class FormTomoacBlockController extends BlockController {
 	public function view(){ 
 		$pURI = ($_REQUEST['pURI']) ? $_REQUEST['pURI'] : str_replace(array('&ccm_token='.$_REQUEST['ccm_token'],'&btask=passthru','&method=submit_form'),'',$_SERVER['REQUEST_URI']);
 		$this->set('pURI',  htmlentities( $pURI, ENT_COMPAT, APP_CHARSET));
+        $this->set("bID",intval($this->_bID));
 	}
 	
 	public function getDefaultThankYouMsg() {
@@ -282,35 +282,44 @@ class FormTomoacBlockController extends BlockController {
 		foreach($rows as $row){
 
 		  if($_POST['state'] != 2) {
-			// ==== テキストエリアチェック ==========
-			if($row['inputType']=='text'){
-				$fld = trim($_POST['Question'.$row['msqID']]);
-				$f = htmlspecialchars($fld, ENT_QUOTES);
-				if($fld !== $f)
-					$errors['FieldError'] .= $row['question'] . ": 特殊文字は入力できません。<br />";
-			}
-			// ==== テキストフィールドチェック ==========
-			if($row['inputType']=='field'){
+
+			if($row['inputType']=='field' or $row['inputType']=='text'){
 				$rrr = "";
 				$fld = trim($_POST['Question'.$row['msqID']]);
+				/*
 				$f = htmlspecialchars($fld, ENT_QUOTES);
 				if($fld !== $f)
 					$errors['FieldError'] .= $row['question'] . ": 特殊文字は入力できません。<br />";
+				*/
 				$str = $row['checklevel'];
 				if(mb_strpos($str, 'HN')===FALSE) { // 半角数字禁止
 			        $res = preg_replace('/[0-9]+/','',$fld);
-					if($fld != $res)
-						$errors['FieldError'] .= $row['question'] . ": 半角数字は入力できません。<br />";
+					if($fld != $res){
+						//$errors['FieldError'] .= $row['question'] . ": 半角数字は入力できません。<br />";
+						$fld = mb_convert_kana($fld,"N","UTF-8");
+				    }
 				}
 				if(mb_strpos($str, 'HO')===FALSE) { // 半角英字禁止
 			        $res = preg_replace('/[a-zA-Z]+/','',$fld);
-					if($fld != $res)
-						$errors['FieldError'] .= $row['question'] . ": 半角英字は入力できません。<br />";
+					if($fld != $res){
+						//$errors['FieldError'] .= $row['question'] . ": 半角英字は入力できません。<br />";
+						$fld = mb_convert_kana($fld,"R","UTF-8");
+					}	
 				}
 				if(mb_strpos($str, 'HS')===FALSE) { // 半角特殊記号禁止
 			        $res = preg_replace('/[\+\-\/\*\,\. ]+/','',$fld);
-					if($fld != $res)
-						$errors['FieldError'] .= $row['question'] . ": 半角特殊記号は入力できません。<br />";
+					if($fld != $res){
+						//$errors['FieldError'] .= $row['question'] . ": 半角特殊記号は入力できません。<br />";
+				        $fld = str_replace("[","［",$fld);
+				        $fld = str_replace("+","＋",$fld);
+				        $fld = str_replace("-","ー",$fld);
+				        $fld = str_replace("/","／",$fld);
+				        $fld = str_replace("\\","＼",$fld);
+				        $fld = str_replace("*","＊",$fld);
+				        $fld = str_replace(",","，",$fld);
+				        $fld = str_replace(".","．",$fld);
+				        $fld = str_replace("]","］",$fld);
+				    }
 				}
 				mb_regex_encoding("UTF-8");
 				if(mb_strpos($str, 'ZH')===FALSE) { // 全角ひらがな禁止
@@ -320,8 +329,10 @@ class FormTomoacBlockController extends BlockController {
 				}
 				if(mb_strpos($str, 'ZT')===FALSE) { // 全角カタカナ禁止
 					$res = mb_ereg_replace('[ァ-ヶ]','',$fld);
-					if($res!=$fld)
-						$errors['FieldError'] .= $row['question'] . ": 全角カタカナは入力できません。<br />";
+					if($res!=$fld){
+						//$errors['FieldError'] .= $row['question'] . ": 全角カタカナは入力できません。<br />";
+						$fld = mb_convert_kana($fld,"k","UTF-8");
+				    }
 				}
 				if(mb_strpos($str, 'ZK')===FALSE) { // 全角漢字禁止
 					$res = mb_ereg_replace('[亜-腕]','',$fld);
@@ -938,10 +949,9 @@ class MiniSurveyTomoac{
 						$sql='INSERT INTO btFormTomoacQuestions (msqID,questionSetId,question,inputType,
 									options,position,width,height,required,layout,layout2,checklevel,description,description2) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'; 
 						$result=$this->db->query($sql,$dataValues);  
-					}
-					else {											// Others
-						if($values['inputType']=='mail' || $values['inputType']=='mailx2') {
-							$values['layout'] = $values['mcheck'];   // メール送信するかどうかのフラグ
+					}else{
+					   if($values['inputType']=='mail' || $values['inputType']=='mailx2') {
+				            $values['layout'] = $values['mcheck'];   // メール送信するかどうかのフラグ
 						}
 						if(!intval($values['msqID']))
 							$values['msqID']=intval($this->db->GetOne("SELECT MAX(msqID) FROM btFormTomoacQuestions")+1); 
